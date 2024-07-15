@@ -89,7 +89,7 @@ fn from(string: &str) -> Result<HashMap<Vec<String>, Node>, String> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{smallest_that_works, from, size_of, Node};
+    use crate::{smallest_that_works, from};
 
     const INPUT: &str = "$ cd /
 $ ls
