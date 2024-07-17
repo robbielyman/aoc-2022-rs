@@ -125,8 +125,6 @@ impl Elem {
 
 #[cfg(test)]
 mod tests {
-    use std::cmp::Ordering;
-
     use crate::Elem;
 
     const INPUT: &str = "[1,1,3,1,1]
