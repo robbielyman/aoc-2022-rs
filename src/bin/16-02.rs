@@ -104,12 +104,11 @@ fn parse(input: &str) -> (Vec<Node>, usize) {
 struct PartialSolution {
     data: HashSet<usize>,
     score: usize,
-    remaining: usize,
-    current: usize,
+    remaining: [usize; 2],
+    current: [usize; 2],
 }
 
 fn solve(graph: &Graph, start_loc: usize) -> usize {
-    
     let distances = distances(graph);
     let vec: Vec<_> = graph
         .iter()
@@ -122,33 +121,45 @@ fn solve(graph: &Graph, start_loc: usize) -> usize {
             }
         })
         .collect();
-    let mut unfinished = vec![PartialSolution { data: HashSet::new(), score: 0, remaining: 30, current: start_loc }];
+    let mut unfinished = vec![PartialSolution {
+        data: HashSet::new(),
+        score: 0,
+        remaining: [26, 26],
+        current: [start_loc, start_loc],
+    }];
     let mut best = 0;
     while !unfinished.is_empty() {
-        unfinished = unfinished.iter()
-            .flat_map(|partial| {
-                vec.iter()
-                    .filter_map(|(idx, flow_amt)| {
-                        if partial.data.contains(idx) { return None; }
-                        let distance = &distances[partial.current][*idx] + 1;
-                        if partial.remaining < distance { return None;}
-                        let mut data = partial.data.clone();
-                        data.insert(*idx);
-                        let remaining = partial.remaining - distance;
-                        let score = partial.score + (remaining * *flow_amt as usize);
-                        Some(PartialSolution { data, score, remaining, current: *idx })
-                    })
-            })
-            .filter(|partial| {
-                let is_incomplete = vec.iter()
-                    .any(|(idx, _)| {
-                        let distance = distances[partial.current][*idx] + 1;
-                        !partial.data.contains(idx) && distance < partial.remaining
-                    });
-                if !is_incomplete { best = best.max(partial.score); }
-                is_incomplete
-            })
-            .collect();
+        for i in 0..2 {
+            if unfinished.is_empty() { break; }
+            unfinished = unfinished.iter()
+                .flat_map(|partial| {
+                    vec.iter()
+                        .filter_map(|(idx, flow_amt)| {
+                            if partial.data.contains(idx) { return None; }
+                            let distance = distances[partial.current[i]][*idx] + 1;
+                            if distance > partial.remaining[i] { return None; }
+                            let mut ret = partial.clone();
+                            ret.data.insert(*idx);
+                            ret.remaining[i] -= distance;
+                            ret.current[i] = *idx;
+                            ret.score += ret.remaining[i] * *flow_amt as usize;
+                            Some(ret)     
+                        })
+                })
+                .filter(|partial| {
+                    let is_incomplete = vec.iter()
+                        .any(|(idx, _)| {
+                            for i in 0..2 {
+                                let distance = distances[partial.current[i]][*idx] + 1;
+                                if !partial.data.contains(idx) && distance < partial.remaining[i] { return true; }
+                            }
+                            false
+                        });
+                    if !is_incomplete { best = best.max(partial.score); }
+                    is_incomplete
+                })
+                .collect();
+        }
     }
     best
 }
@@ -173,6 +184,6 @@ Valve JJ has flow rate=21; tunnel leads to valve II
     fn big_graph() {
         let (graph, start) = parse(INPUT);
         let score = solve(&graph, start);
-        assert_eq!(score, 1651);
+        assert_eq!(score, 1707);
     }
 }
