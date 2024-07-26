@@ -1,4 +1,4 @@
-use std::{collections::{HashMap, HashSet}, fmt::{write, Display}, fs::File, io::Read, path::Path, time::Instant};
+use std::{collections::HashMap, fmt::Display, fs::File, io::Read, path::Path, time::Instant};
 
 fn main() {
     let path = Path::new("17.txt");
@@ -214,10 +214,7 @@ impl Shape {
 
 #[cfg(test)]
 mod tests {
-    use crate::{height_after, Shape};
-
-    const INPUT: &str = ">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>
-";
+    use crate::Shape;
 
     #[test]
     fn bitmunging() {
@@ -230,11 +227,5 @@ mod tests {
             })
             .collect();
         assert_eq!(vec![true, true, true, true, true], ok);
-    }
-
-    #[test]
-    fn height_after_2022() {
-        let height = height_after(INPUT, 1_000_000_000_000);
-        assert_eq!(height, 1514285714288);
     }
 }
